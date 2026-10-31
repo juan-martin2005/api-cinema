@@ -457,3 +457,6 @@ WHERE cr.id=st.cinema_room_id AND (
  (cr.name ILIKE '%VIP%' AND f.name ILIKE '%VIP%') OR
  (cr.name ILIKE '%3D%' AND f.name ILIKE '%3D%') OR
  (cr.name ILIKE '%2D%' AND f.name ILIKE '%2D%'));
+
+UPDATE show_times st SET end_time=st.start_time + m.duration * INTERVAL '1 minute'
+FROM movies m WHERE m.id=st.movie_id;
