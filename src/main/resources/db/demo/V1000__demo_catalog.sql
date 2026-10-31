@@ -1,6 +1,6 @@
 --
-INSERT INTO roles (name) VALUES ('USER');
-INSERT INTO roles (name) VALUES ('ADMIN');
+
+
 
 -- =============================================================================
 -- 2. DEMO USERS (development only; replace password through local setup)
@@ -17,20 +17,20 @@ INSERT INTO user_roles (user_id, role_id) VALUES ('66c97056-63d7-45cc-9fe0-1e7c7
 -- =============================================================================
 -- 3. FORMATOS DE PROYECCION (FORMATS)
 -- =============================================================================
-INSERT INTO formats (id, name, price) VALUES (1, '2D Estándar', 18.00);
+INSERT INTO formats (id, name, price) VALUES (1, '2D EstÃƒÂ¡ndar', 18.00);
 INSERT INTO formats (id, name, price) VALUES (2, '3D Digital', 24.00);
 INSERT INTO formats (id, name, price) VALUES (3, 'IMAX Laser', 34.00);
-INSERT INTO formats (id, name, price) VALUES (4, '4DX Dinámica', 40.00);
+INSERT INTO formats (id, name, price) VALUES (4, '4DX DinÃƒÂ¡mica', 40.00);
 INSERT INTO formats (id, name, price) VALUES (5, 'VIP Prime Lounge', 32.00);
 
 -- =============================================================================
 -- 4. CINES (CINEMAS) - 2 CINES
 -- =============================================================================
 -- Cine 1: CinePlanet Prime Plaza San Miguel (Lima)
-INSERT INTO cinemas (id, name, img, address, second_address, city, latitude, longitude, room_quantity, description) VALUES ('a1111111-1111-1111-1111-111111111111', 'CinePlanet Prime San Miguel', 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800', 'Av. La Marina 2000', 'C.C. Plaza San Miguel - Nivel 3', 'Lima', -12.077222, -77.080556, 4, 'Complejo moderno equipado con salas IMAX Laser, 4DX y sonido Dolby Atmos envolvente, zona de dulcería premium y butacas reclinables de cuero.');
+INSERT INTO cinemas (id, name, img, address, second_address, city, latitude, longitude, room_quantity, description) VALUES ('a1111111-1111-1111-1111-111111111111', 'CinePlanet Prime San Miguel', 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800', 'Av. La Marina 2000', 'C.C. Plaza San Miguel - Nivel 3', 'Lima', -12.077222, -77.080556, 4, 'Complejo moderno equipado con salas IMAX Laser, 4DX y sonido Dolby Atmos envolvente, zona de dulcerÃƒÂ­a premium y butacas reclinables de cuero.');
 
 -- Cine 2: CineMark Grand Jockey Plaza (Lima)
-INSERT INTO cinemas (id, name, img, address, second_address, city, latitude, longitude, room_quantity, description) VALUES ('a2222222-2222-2222-2222-222222222222', 'CineMark Grand Jockey Mall', 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=800', 'Av. Javier Prado Este 4200', 'Jockey Plaza Shopping Center - Nave Central', 'Lima', -12.086389, -76.974444, 4, 'Experiencia cinematográfica de primer nivel con salas VIP, servicio gourmet directo a la butaca, proyección láser 4K y sonido envolvente.');
+INSERT INTO cinemas (id, name, img, address, second_address, city, latitude, longitude, room_quantity, description) VALUES ('a2222222-2222-2222-2222-222222222222', 'CineMark Grand Jockey Mall', 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=800', 'Av. Javier Prado Este 4200', 'Jockey Plaza Shopping Center - Nave Central', 'Lima', -12.086389, -76.974444, 4, 'Experiencia cinematogrÃƒÂ¡fica de primer nivel con salas VIP, servicio gourmet directo a la butaca, proyecciÃƒÂ³n lÃƒÂ¡ser 4K y sonido envolvente.');
 
 -- =============================================================================
 -- 5. FORMATOS POR CINE (CINEMA_FORMATS)
@@ -349,7 +349,7 @@ INSERT INTO movies (id, title, description, poster_url, classification, duration
 INSERT INTO movies (id, title, description, poster_url, classification, duration, genre, is_new_release, is_pre_sale, opening_date) VALUES ('c0000000-0000-0000-0000-000000000002', 'Deadpool & Wolverine', 'Un apatico Wade Wilson se afana en la vida civil tras dejar atras sus dias como Deadpool. Pero cuando su mundo natal se enfrenta a una amenaza existencial, debe volver a enfundarse el traje junto a un reticente Wolverine.', 'https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg', '+18', 128, 'Accion / Comedia', false, false, (CURRENT_DATE + INTERVAL '2 days' + TIME '00:00:00'));
 
 -- 3. IntensaMente 2
-INSERT INTO movies (id, title, description, poster_url, classification, duration, genre, is_new_release, is_pre_sale, opening_date) VALUES ('c0000000-0000-0000-0000-000000000003', 'IntensaMente 2', 'Regresa a la mente de Riley recién entrada en la adolescencia justo cuando su cuartel general sufre una repentina demolicion para dar paso a nuevas emociones: Ansiedad, Envidia, Ennui y Verguenza.', 'https://image.tmdb.org/t/p/w500/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg', 'ATP', 96, 'Animacion / Familiar', false, false, (CURRENT_DATE + INTERVAL '2 days' + TIME '00:00:00'));
+INSERT INTO movies (id, title, description, poster_url, classification, duration, genre, is_new_release, is_pre_sale, opening_date) VALUES ('c0000000-0000-0000-0000-000000000003', 'IntensaMente 2', 'Regresa a la mente de Riley reciÃƒÂ©n entrada en la adolescencia justo cuando su cuartel general sufre una repentina demolicion para dar paso a nuevas emociones: Ansiedad, Envidia, Ennui y Verguenza.', 'https://image.tmdb.org/t/p/w500/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg', 'ATP', 96, 'Animacion / Familiar', false, false, (CURRENT_DATE + INTERVAL '2 days' + TIME '00:00:00'));
 
 -- 4. Gladiador 2
 INSERT INTO movies (id, title, description, poster_url, classification, duration, genre, is_new_release, is_pre_sale, opening_date) VALUES ('c0000000-0000-0000-0000-000000000004', 'Gladiador 2', 'Anos despues de presenciar la muerte del admirado heroe Maximo, Lucio debe ingresar al Coliseo tras ser testigo de la conquista de su hogar por parte de los tiranicos emperadores que ahora dirigen Roma.', 'https://image.tmdb.org/t/p/w500/2cxhvwyEwRlysAmRH4iodkvo0z5.jpg', '+14', 148, 'Accion / Drama / Epico', true, false, (CURRENT_DATE + INTERVAL '2 days' + TIME '00:00:00'));
@@ -448,3 +448,12 @@ INSERT INTO show_times (id, movie_id, cinema_room_id, start_time, end_time) VALU
 
 
 SELECT setval(pg_get_serial_sequence('formats','id'), (SELECT MAX(id) FROM formats));
+
+UPDATE show_times st SET format_id=f.id
+FROM cinema_rooms cr JOIN cinema_formats cf ON cf.cinema_id=cr.cinema_id JOIN formats f ON f.id=cf.format_id
+WHERE cr.id=st.cinema_room_id AND (
+ (cr.name ILIKE '%IMAX%' AND f.name ILIKE '%IMAX%') OR
+ (cr.name ILIKE '%4DX%' AND f.name ILIKE '%4DX%') OR
+ (cr.name ILIKE '%VIP%' AND f.name ILIKE '%VIP%') OR
+ (cr.name ILIKE '%3D%' AND f.name ILIKE '%3D%') OR
+ (cr.name ILIKE '%2D%' AND f.name ILIKE '%2D%'));

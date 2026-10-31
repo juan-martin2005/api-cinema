@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:cinema-${random.uuid};MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ''
+  flyway:
+    enabled: false
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:test-schema.sql
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: validate
+  security:
+    jwt:
+      secretKey: dGVzdC1vbmx5LXNpZ25pbmcta2V5LWF0LWxlYXN0LTMyLWJ5dGVzLWxvbmc=
+  cache:
+    type: simple
+app:
+  jobs-enabled: false
+stripe:
+  enabled: false
