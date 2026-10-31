@@ -2,72 +2,72 @@ spring:
   config:
     import: optional:file:.env[.properties]
   application:
-    name: sistema
+    name: api-cinema
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/cinema_dev}
+    username: ${DATABASE_USERNAME:cinema}
+    password: ${DATABASE_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    baseline-on-migrate: false
   data:
     redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      connect-timeout: 500ms
+      timeout: 500ms
   cache:
     type: redis
-
-  datasource:
-    url: ${DATABASE_URL}
-    username: ${DATABASE_USERNAME}
-    password: ${DATABASE_PASSWORD}
-    driver-class-name: ${DATABASE_DRIVER_CLASS_NAME}
-  jpa:
-    hibernate:
-        ddl-auto: create
-    properties:
-      hibernate:
-        dialect: ${DATABASE_DIALECT}
   security:
     jwt:
-      secretKey: ${JWT_SECRET_KEY}
-      expiration: ${JWT_EXPIRATION_TIME}
-      refresh-expiration: ${JWT_REFRESH_TOKEN_TIME}
+      secretKey: ${JWT_SECRET_KEY:}
+      expiration: ${JWT_EXPIRATION_TIME:900000}
+      refresh-expiration: ${JWT_REFRESH_TOKEN_TIME:604800000}
     oauth2:
       client:
         registration:
           google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret: ${GOOGLE_CLIENT_SECRET}
+            client-id: ${GOOGLE_CLIENT_ID:disabled}
+            client-secret: ${GOOGLE_CLIENT_SECRET:disabled}
           facebook:
-            client-id: ${FACEBOOK_CLIENT_ID}
-            client-secret: ${FACEBOOK_CLIENT_SECRET}
-            scope:
-              - email
-              - public_profile
+            client-id: ${FACEBOOK_CLIENT_ID:disabled}
+            client-secret: ${FACEBOOK_CLIENT_SECRET:disabled}
+            scope: email,public_profile
         provider:
-            facebook:
-              user-info-uri: ${FACEBOOK_USER_INFO_URI}
+          facebook:
+            user-info-uri: ${FACEBOOK_USER_INFO_URI:https://graph.facebook.com/me?fields=id,email,first_name,last_name}
   mail:
-    host: ${MAIL_HOST}
-    port: ${MAIL_PORT}
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:noreply@example.test}
+    password: ${MAIL_PASSWORD:}
     properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-          conectiontimeout: 5000
-          timeout: 5000
+      mail.smtp:
+        auth: ${MAIL_AUTH:false}
+        starttls.enable: ${MAIL_STARTTLS:false}
+        connectiontimeout: 5000
+        timeout: 5000
+        writetimeout: 5000
   servlet:
     multipart:
       max-file-size: 5MB
-
-
-#springdoc:
-#  swagger-ui:
-#    operations-sorter: alpha
-#    tags-sorter: alpha
-redirect-url: ${REDIRECT_URL}
-movie:
-  poster:
-    directory: ${DIRECTORY_UPLOAD}
-
-cloudinary:
-  url: ${CLOUDINARY_URL}
-
+      max-request-size: 6MB
+redirect-url: ${REDIRECT_URL:http://localhost:3000/auth/callback}
+movie.poster.directory: ${DIRECTORY_UPLOAD:cinema/posters}
+cloudinary.url: ${CLOUDINARY_URL:cloudinary://disabled:disabled@disabled}
+app:
+  zone: America/Lima
+  cors-origins: ${CORS_ORIGINS:http://localhost:3000}
+  tax-rate: ${TAX_RATE:0.18}
+  jobs-enabled: ${JOBS_ENABLED:true}
+stripe:
+  enabled: ${STRIPE_ENABLED:false}
+  secret-key: ${STRIPE_SECRET_KEY:}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+  success-url: ${STRIPE_SUCCESS_URL:http://localhost:3000/payment/success?session_id={CHECKOUT_SESSION_ID}}
+  cancel-url: ${STRIPE_CANCEL_URL:http://localhost:3000/payment/cancel}
