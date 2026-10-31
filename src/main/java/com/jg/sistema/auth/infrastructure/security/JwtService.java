@@ -39,7 +39,7 @@ public class JwtService implements TokenGeneratorPort {
                     .compact();
 
         }catch (JwtException ex){
-            return null;
+            throw new IllegalStateException("Unable to sign access token", ex);
         }
     }
     
@@ -70,6 +70,7 @@ public class JwtService implements TokenGeneratorPort {
     public Map<String, Object> getClaims(String email) {
         UserResponseDTO user = userRepository.findByEmailWithRoles(email).map(UserMapper::mapToResponseDTO).orElseThrow();
         Map<String, Object> claims = new HashMap<>();
+        claims.put("sessionVersion", userRepository.sessionVersion(email));
         claims.put("name", user.name());
         claims.put("lastName", user.lastName());
         claims.put("roles", user.roles());
@@ -83,6 +84,8 @@ public class JwtService implements TokenGeneratorPort {
                 .parseSignedClaims(token)
                 .getPayload();
     }
+    @jakarta.annotation.PostConstruct
+    void validateConfiguration() { getSecretKey(); }
     private SecretKey getSecretKey() {
         return Keys.hmacShaKeyFor(Base64.getDecoder().decode(secret));
     }

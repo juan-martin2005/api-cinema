@@ -33,6 +33,7 @@ public class JpaRefreshTokenAdapter implements RefreshTokenPort {
     }
 
     @Override
+    @Transactional
     public Optional<RefreshToken> findByToken(String token) {
         String hasToken = hash256(token);
         return refreshTokenRepository.findByToken(hasToken)

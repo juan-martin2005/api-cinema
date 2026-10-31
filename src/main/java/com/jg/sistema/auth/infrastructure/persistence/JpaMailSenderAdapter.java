@@ -24,6 +24,7 @@ import java.util.Optional;
 public class JpaMailSenderAdapter implements EmailSenderPort {
 
     private final JavaMailSender mailSender;
+    private final MailOutbox outbox;
     private final PostgreSqlEmailVerificationRepository emailVerificationRepository;
     private final PostgreSqlUserRepository userRepository;
 
@@ -36,19 +37,7 @@ public class JpaMailSenderAdapter implements EmailSenderPort {
     }
 
     @Override
-    @Async
-    public void sendEmail(String to, String subject, String body) {
-        try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fronEmail);
-            message.setTo(to);
-            message.setSubject(subject);
-            message.setText(body);
-            mailSender.send(message);
-        }catch (Exception ex){
-            log.error("Failed to send email to {}: {}", to, ex.getMessage());
-        }
-    }
+    public void sendEmail(String to, String subject, String body) { outbox.enqueue(to,subject,body); }
 
     @Override
     public void saveEmailVerification(EmailVerification emailVerification) {
@@ -62,8 +51,8 @@ public class JpaMailSenderAdapter implements EmailSenderPort {
     public void verifyEmail(String email) {
         UserEntity userEntity = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
+        if (!Boolean.TRUE.equals(userEntity.getIsVerified())) userEntity.setIsActive(true);
         userEntity.setIsVerified(true);
-        userEntity.setIsActive(true);
         userRepository.save(userEntity);
     }
 
@@ -75,6 +64,7 @@ public class JpaMailSenderAdapter implements EmailSenderPort {
     @Override
     public void deleteEmailVerificationByEmail(String email) {
         emailVerificationRepository.deleteByEmail(email);
+        emailVerificationRepository.flush();
     }
 
 

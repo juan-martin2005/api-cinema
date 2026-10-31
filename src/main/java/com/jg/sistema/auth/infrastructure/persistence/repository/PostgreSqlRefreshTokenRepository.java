@@ -11,6 +11,7 @@ import java.util.UUID;
 
 public interface PostgreSqlRefreshTokenRepository extends JpaRepository<RefreshTokenEntity, Long> {
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     Optional<RefreshTokenEntity> findByToken(String token);
 
     Optional<RefreshTokenEntity> findByUser_Id(UUID userId);

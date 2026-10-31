@@ -3,8 +3,11 @@ spring:
     import: optional:file:.env[.properties]
   application:
     name: api-cinema
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/cinema_dev}
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:15432/cinema_dev}
     username: ${DATABASE_USERNAME:cinema}
     password: ${DATABASE_PASSWORD:}
     driver-class-name: org.postgresql.Driver
@@ -66,6 +69,7 @@ app:
   tax-rate: ${TAX_RATE:0.18}
   jobs-enabled: ${JOBS_ENABLED:true}
 stripe:
+  allow-live: ${STRIPE_ALLOW_LIVE:false}
   enabled: ${STRIPE_ENABLED:false}
   secret-key: ${STRIPE_SECRET_KEY:}
   webhook-secret: ${STRIPE_WEBHOOK_SECRET:}

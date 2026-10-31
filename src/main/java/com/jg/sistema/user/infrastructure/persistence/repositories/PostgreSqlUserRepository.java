@@ -8,9 +8,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface PostgreSqlUserRepository extends JpaRepository<UserEntity, UUID> {
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = "roles")
     Optional<UserEntity> findByEmail(String email);
 
-    @Query("SELECT u FROM UserEntity u JOIN FETCH u.roles WHERE u.email = :email ")
+    @Query("SELECT u FROM UserEntity u LEFT JOIN FETCH u.roles WHERE u.email = :email ")
     Optional<UserEntity> findByEmailWithRoles(String email);
 
 }

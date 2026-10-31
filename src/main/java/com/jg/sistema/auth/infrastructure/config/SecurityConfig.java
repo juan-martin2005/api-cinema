@@ -26,6 +26,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final Oauth2SuccessHandler oauth2SuccessHandler;
+    @org.springframework.beans.factory.annotation.Value("${app.cors-origins:http://localhost:3000}") private String origins;
 
     @Bean
     public SecurityFilterChain configure(HttpSecurity http) throws Exception {
@@ -41,6 +42,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/v3/api-docs",
                                 "/api/email/**",
+                                "/api/payments/stripe/webhook",
                                 "/picture/**",
                                 "/api/show-times/**",
                                 "/api/cinemas/**",
@@ -61,9 +63,9 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfiguration(){
         CorsConfiguration cors = new CorsConfiguration();
-        cors.setAllowedOrigins(List.of("http://localhost:3000"));
-        cors.setAllowedHeaders(Arrays.asList("Authorization","Content-Type"));
-        cors.setAllowedMethods(Arrays.asList("GET","POST","PUT","PATCH","DELETE"));
+        cors.setAllowedOrigins(Arrays.asList(origins.split(",")));
+        cors.setAllowedHeaders(Arrays.asList("Authorization","Content-Type","Idempotency-Key"));
+        cors.setAllowedMethods(Arrays.asList("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
         cors.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

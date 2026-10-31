@@ -1,58 +1,36 @@
 package com.jg.sistema.auth.infrastructure.security;
-
-import com.jg.sistema.auth.application.port.in.RefreshTokenUseCase;
-import com.jg.sistema.user.application.port.in.RegisterUserUseCase;
-import com.jg.sistema.user.application.port.out.UserRepositoryPort;
-import com.jg.sistema.user.domain.model.User;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import com.jg.sistema.auth.application.service.OAuthAccountService;
+import jakarta.servlet.http.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-
+import org.springframework.web.util.UriComponentsBuilder;
 import java.io.IOException;
-import java.time.LocalDateTime;
-
-@Component
-@RequiredArgsConstructor
+@Component @RequiredArgsConstructor
 public class Oauth2SuccessHandler implements AuthenticationSuccessHandler {
-
-    @Value("${redirect-url}")
-    private String redirectUrl;
-    private final JwtService jwtService;
-    private final RegisterUserUseCase registerUserUseCase;
-    private final RefreshTokenUseCase refreshTokenUseCase;
-
-    @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-
-        OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
-        OAuth2User oAuth2User = oauthToken.getPrincipal();
-        if (oAuth2User != null) {
-
-            String provider = oauthToken.getAuthorizedClientRegistrationId();
-            String email = oAuth2User.getAttribute("email");
-            String name = null;
-            String lastName = null;
-
-            if("facebook".equals(provider)){
-                name = oAuth2User.getAttribute("first_name");
-                lastName =  oAuth2User.getAttribute("last_name");
-            } else if("google".equals(provider)){
-                name = oAuth2User.getAttribute("given_name");
-                lastName =  oAuth2User.getAttribute("last_name");
-            }
-
-            registerUserUseCase.registerUserOauth2(email, name, lastName);
-
-            String token = jwtService.generateToken(email);
-            String refreshToken = refreshTokenUseCase.createRefreshTokenOauth2(email);
-            response.sendRedirect(redirectUrl+"?token="+token+"&refreshToken="+refreshToken);
+    private final OAuthAccountService accounts;
+    @Value("${redirect-url}") private String redirect;
+    public void onAuthenticationSuccess(HttpServletRequest request,HttpServletResponse response,Authentication auth) throws IOException {
+        var token=(OAuth2AuthenticationToken)auth;
+        var user=token.getPrincipal(); String provider=token.getAuthorizedClientRegistrationId();
+        if("google".equals(provider) && !Boolean.TRUE.equals(user.getAttribute("email_verified"))) {
+            response.sendError(401,"Provider email is not verified"); return;
         }
+        String subject=String.valueOf(user.getAttributes().getOrDefault("sub",user.getAttributes().get("id")));
+        if("null".equals(subject)) { response.sendError(401,"Provider identity missing"); return; }
+        String code;
+        try {
+            code=accounts.issue(provider,subject,user.getAttribute("email"),user.getAttribute("given_name")!=null?user.getAttribute("given_name"):user.getAttribute("first_name"),"google".equals(provider)?user.getAttribute("family_name"):user.getAttribute("last_name"));
+        } catch(org.springframework.web.server.ResponseStatusException ex) {
+            if(request.getSession(false)!=null) request.getSession(false).invalidate();
+            org.springframework.security.core.context.SecurityContextHolder.clearContext();
+            response.sendError(ex.getStatusCode().value(),"OAuth2 sign-in rejected");return;
+        }
+        if(request.getSession(false)!=null) request.getSession(false).invalidate();
+        org.springframework.security.core.context.SecurityContextHolder.clearContext();
+        response.sendRedirect(UriComponentsBuilder.fromUriString(redirect).queryParam("code",code).build().encode().toUriString());
     }
 }

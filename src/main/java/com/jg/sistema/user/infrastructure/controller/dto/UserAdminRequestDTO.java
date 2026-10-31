@@ -10,6 +10,6 @@ public record UserAdminRequestDTO(
         @NotBlank String name,
         @NotBlank String lastName,
         @NotBlank @Email String email,
-        @NotBlank String password,
-        @NotNull Set<String>roles) {
+        @NotBlank @jakarta.validation.constraints.Size(min = 8, max = 72) String password,
+        @jakarta.validation.constraints.NotEmpty Set<@NotBlank String>roles) {
 }

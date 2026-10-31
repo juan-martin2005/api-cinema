@@ -21,7 +21,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(noRollbackFor = {RefreshTokenExpiredException.class, InvalidCredentialException.class})
 public class RefreshTokenService implements RefreshTokenUseCase {
 
     private final TokenGeneratorPort tokenGeneratorPort;

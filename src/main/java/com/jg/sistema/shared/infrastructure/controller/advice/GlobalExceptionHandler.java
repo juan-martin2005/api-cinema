@@ -36,11 +36,20 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+    public ResponseEntity<?> status(org.springframework.web.server.ResponseStatusException ex) {
+        return ResponseEntity.status(ex.getStatusCode()).body(new ErrorResponse("Request rejected", ex.getReason(), ex.getStatusCode().value()));
+    }
+    @ExceptionHandler({IllegalArgumentException.class, org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class})
+    public ResponseEntity<?> invalidArgument(Exception ex) {
+        return ResponseEntity.badRequest().body(new ErrorResponse("Invalid request", "Invalid parameter value", 400));
+    }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<?> handleAllExceptions(Exception ex) {
         ErrorResponse errorResponse = new ErrorResponse(
                 "Data Integrity Violation",
-                "The referenced entity cannot be deleted because it is associated with other entities. Please remove the associations before deleting.",
+                "The operation conflicts with an existing record or a referenced entity.",
                 409
         );
         return ResponseEntity.status(409).body(errorResponse);

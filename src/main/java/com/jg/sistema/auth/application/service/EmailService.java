@@ -20,15 +20,19 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Service
 public class EmailService implements SendCodeEmailUseCase, VerifyEmailUseCase, ResendEmailVerificationCodeUseCase {
+    private final java.time.Clock clock;
 
     private final EmailSenderPort emailSender;
     private final UserRepositoryPort userRepository;
+    private final AuthRateLimiter limiter;
 
     @Override
     @Transactional
     public void sendCodeToEmail(String email) {
+        email = email.strip().toLowerCase(java.util.Locale.ROOT);
+        limiter.check("resend:"+email,1,java.time.Duration.ofMinutes(1));
 
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("User not found"));
         emailSender.deleteEmailVerificationByEmail(user.email());
 
         String code = getOTP();
@@ -41,7 +45,7 @@ public class EmailService implements SendCodeEmailUseCase, VerifyEmailUseCase, R
                 user.id(),
                 code,
                 email,
-                LocalDateTime.now().plusMinutes(5)
+                LocalDateTime.now(clock).plusMinutes(5)
         );
         emailSender.saveEmailVerification(emailVerification);
     }
@@ -49,12 +53,14 @@ public class EmailService implements SendCodeEmailUseCase, VerifyEmailUseCase, R
     @Override
     @Transactional
     public void verifyEmail(String email, String code) {
+        email = email.strip().toLowerCase(java.util.Locale.ROOT);
         EmailVerification ev = emailSender.getEmailVerificationByEmail(email)
                 .orElseThrow(() -> new VerifyCodeException("No verification code found for this email."));
+        limiter.check("verify:"+email+":"+ev.id(),5,java.time.Duration.ofMinutes(5));
         if (!ev.code().equals(code)) {
             throw new VerifyCodeException("The verification code is invalid.");
         }
-        if (LocalDateTime.now().isAfter(ev.expiresAt())) {
+        if (LocalDateTime.now(clock).isAfter(ev.expiresAt())) {
             throw new VerifyCodeException("The verification code has expired.");
         }
         emailSender.verifyEmail(email);
@@ -65,7 +71,7 @@ public class EmailService implements SendCodeEmailUseCase, VerifyEmailUseCase, R
     @Transactional
     public void resendEmailVerificationCode(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         if (Boolean.TRUE.equals(user.isVerified())) {
             throw new VerifyCodeException("This account is already verified.");

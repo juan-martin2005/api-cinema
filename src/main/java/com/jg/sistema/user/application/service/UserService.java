@@ -94,6 +94,7 @@ public class UserService implements GetUserUseCase, CreateUserUseCase, RegisterU
     }
 
     @Override
+    @Transactional
     public void registerUserOauth2(String email, String name, String lastname) {
         if (userRepository.findByEmail(email).isEmpty()) {
             Role role = rolRepository.findByName("USER").orElseThrow(() -> new RolNotFoundException("Default role not found: USER"));
@@ -120,6 +121,7 @@ public class UserService implements GetUserUseCase, CreateUserUseCase, RegisterU
         User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
         User updatedUser = user.isActive() ? user.deactivate() : user.activate();
         userRepository.save(updatedUser);
+        userRepository.revokeSessions(id);
     }
 
     @Override
@@ -144,6 +146,7 @@ public class UserService implements GetUserUseCase, CreateUserUseCase, RegisterU
         userRepository.save(
                 user.changePassword(encodedPassword)
         );
+        userRepository.revokeSessions(id);
     }
 
 }

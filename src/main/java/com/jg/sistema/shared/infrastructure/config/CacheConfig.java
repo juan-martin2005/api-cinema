@@ -17,7 +17,21 @@ import java.util.Map;
 
 @Configuration
 @EnableCaching
-public class CacheConfig {
+public class CacheConfig implements org.springframework.cache.annotation.CachingConfigurer {
+    @Bean
+    @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name="spring.cache.type",havingValue="simple")
+    public org.springframework.cache.CacheManager localCacheManager() {
+        return new org.springframework.cache.concurrent.ConcurrentMapCacheManager();
+    }
+    @Override public org.springframework.cache.interceptor.CacheErrorHandler errorHandler() {
+        return new org.springframework.cache.interceptor.CacheErrorHandler() {
+            private void warn(RuntimeException ex) { org.slf4j.LoggerFactory.getLogger(CacheConfig.class).warn("Cache unavailable; using database ({})", ex.getClass().getSimpleName()); }
+            public void handleCacheGetError(RuntimeException ex,org.springframework.cache.Cache c,Object key) { warn(ex); }
+            public void handleCachePutError(RuntimeException ex,org.springframework.cache.Cache c,Object key,Object value) { warn(ex); }
+            public void handleCacheEvictError(RuntimeException ex,org.springframework.cache.Cache c,Object key) { warn(ex); }
+            public void handleCacheClearError(RuntimeException ex,org.springframework.cache.Cache c) { warn(ex); }
+        };
+    }
 
     /**
      * Configures the Redis cache manager with polymorphic type validation.
@@ -27,7 +41,16 @@ public class CacheConfig {
      * java.time types required by the cached objects.
      */
     @Bean
+    @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name="spring.cache.type",havingValue="redis",matchIfMissing=true)
     public RedisCacheManager redisCacheManager(RedisConnectionFactory connectionFactory) {
+
+        return RedisCacheManager.builder(connectionFactory)
+                .transactionAware()
+                .cacheDefaults(redisDefaults())
+                .build();
+    }
+
+    public RedisCacheConfiguration redisDefaults() {
 
         PolymorphicTypeValidator polymorphicTypeValidator = BasicPolymorphicTypeValidator
                 .builder()
@@ -52,18 +75,6 @@ public class CacheConfig {
                                         .build())
                 );
 
-        RedisCacheConfiguration seatLock = defaultConfig
-                .entryTtl(Duration.ofMinutes(5));
-
-
-        Map<String, RedisCacheConfiguration> cacheConfig =
-                Map.of(
-                        "seat", seatLock
-                );
-
-        return RedisCacheManager.builder(connectionFactory)
-                .cacheDefaults(defaultConfig)
-                .withInitialCacheConfigurations(cacheConfig)
-                .build();
+        return defaultConfig;
     }
 }

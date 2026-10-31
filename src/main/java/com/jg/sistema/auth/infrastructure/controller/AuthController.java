@@ -33,7 +33,7 @@ public class AuthController implements ApiAuthDoc {
 
     @Override
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthRequestDTO loginRequest) {
+    public ResponseEntity<?> login(@Valid @RequestBody AuthRequestDTO loginRequest) {
         TokenPair tokens = authenticationUseCase.authenticate(loginRequest.email(), loginRequest.password());
         AuthResponseDto response = new AuthResponseDto(tokens.accessToken(), tokens.refreshToken());
         return ResponseEntity.ok(response);
@@ -50,7 +50,7 @@ public class AuthController implements ApiAuthDoc {
 
     @Override
     @PostMapping("/refreshToken")
-    public ResponseEntity<?> refreshToken(@RequestBody TokenRefreshRequestDto request) {
+    public ResponseEntity<?> refreshToken(@Valid @RequestBody TokenRefreshRequestDto request) {
         String refreshToken = request.refreshToken();
         TokenPair tokens = refreshTokenUseCase.refreshAccessToken(refreshToken);
         AuthResponseDto response = new AuthResponseDto(tokens.accessToken(), tokens.refreshToken());
@@ -59,7 +59,7 @@ public class AuthController implements ApiAuthDoc {
 
     @Override
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestBody TokenRefreshRequestDto request) {
+    public ResponseEntity<?> logout(@Valid @RequestBody TokenRefreshRequestDto request) {
         refreshTokenUseCase.deleteRefreshTokenByToken(request.refreshToken());
         return ResponseEntity.ok(new ApiResponseDTO("Logout successful", true));
     }

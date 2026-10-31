@@ -4,4 +4,5 @@ import java.util.UUID;
 
 public interface UserContextHolderPort {
     UUID getCurrentUserId();
+    default boolean isAdmin() { return false; }
 }

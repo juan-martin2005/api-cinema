@@ -20,6 +20,8 @@ public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+    @Builder.Default
+    private long sessionVersion = 0;
     private String name;
     private String lastName;
 

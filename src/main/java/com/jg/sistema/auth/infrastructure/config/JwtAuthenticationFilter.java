@@ -25,6 +25,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final com.jg.sistema.user.application.port.out.UserRepositoryPort users;
 
 
     @Override
@@ -36,12 +37,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if(jwtService.validateToken(token) && SecurityContextHolder.getContext().getAuthentication() == null){
                 String userEmail = jwtService.extractSubject(token);
-                UserDetails userDetails =userDetailsService.loadUserByUsername(userEmail);
-                var roles = jwtService.extractRoles(token);
-                var authorities = roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toSet());
-
-                Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                try {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+                    Number version = jwtService.extractAllClaims(token).get("sessionVersion", Number.class);
+                    if (userDetails.isEnabled() && userDetails.isAccountNonLocked() && version != null
+                            && version.longValue() == users.sessionVersion(userEmail)) {
+                        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                    }
+                } catch (org.springframework.security.core.AuthenticationException | com.jg.sistema.user.domain.exception.UserNotFoundException ex) {
+                    SecurityContextHolder.clearContext();
+                }
 
             }
         }
