@@ -12,7 +12,7 @@ public record Booking(
         UUID showTimeId,
         UUID userId,
         BookingStatus bookingStatus,
-        String paymentStatus,
+        com.jg.sistema.booking.domain.model.PaymentStatus paymentStatus,
         BigDecimal subTotal,
         BigDecimal tax,
         BigDecimal total,
@@ -26,7 +26,7 @@ public record Booking(
             UUID showTimeId,
             UUID userId,
             BookingStatus bookingStatus,
-            String paymentStatus,
+            com.jg.sistema.booking.domain.model.PaymentStatus paymentStatus,
             BigDecimal subTotal,
             BigDecimal tax,
             BigDecimal total,
@@ -53,7 +53,7 @@ public record Booking(
         );
     }
 
-    public Booking withStatus(BookingStatus newStatus, String newPaymentStatus) {
+    public Booking withStatus(BookingStatus newStatus, PaymentStatus newPaymentStatus) {
         return new Booking(
                 id,
                 code,

@@ -64,7 +64,7 @@ public class CinemaRoomMapper {
         return new CinemaRoom(
                 null,
                 dto.name(),
-                null,
+                dto.seats().size(),
                 dto.seats().stream().map(SeatMapper::toDomain).collect(Collectors.toList()),
                 dto.cinemaId() != null ? Cinema.withId(dto.cinemaId()) : null
         );

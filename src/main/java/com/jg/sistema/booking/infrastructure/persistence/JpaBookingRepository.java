@@ -15,16 +15,19 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@org.springframework.transaction.annotation.Transactional(readOnly = true)
 @Repository
 @RequiredArgsConstructor
 public class JpaBookingRepository implements BookingRepositoryPort {
 
     private final PostgreSqlBookingRepository postgreSqlBookingRepository;
+    public org.springframework.data.domain.Page<Booking> findPage(Pageable pageable) { return postgreSqlBookingRepository.findAll(pageable).map(BookingMapper::toDomain); }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public Booking save(Booking booking) {
         BookingEntity entity = BookingMapper.toEntity(booking);
-        BookingEntity saved = postgreSqlBookingRepository.save(entity);
+        BookingEntity saved = postgreSqlBookingRepository.saveAndFlush(entity);
         return BookingMapper.toDomain(saved);
     }
 

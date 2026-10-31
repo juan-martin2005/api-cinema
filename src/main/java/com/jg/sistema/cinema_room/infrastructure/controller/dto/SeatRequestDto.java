@@ -5,12 +5,13 @@ import jakarta.validation.constraints.NotNull;
 
 public record SeatRequestDto(
         @NotBlank(message = "row letter of seat is required")
-        String rowLetter,
+        @jakarta.validation.constraints.Pattern(regexp="[A-Z]{1,3}") String rowLetter,
         @NotNull(message = "number of seat is required")
-        Integer number,
+        @jakarta.validation.constraints.Positive Integer number,
         @NotNull(message = "position X of seat letter is required")
-        Integer posX,
+        @jakarta.validation.constraints.PositiveOrZero Integer posX,
         @NotNull(message = "position Y of seat letter is required")
-        Integer posY
+        @jakarta.validation.constraints.PositiveOrZero Integer posY
 ) {
+    public SeatRequestDto { if(rowLetter != null) rowLetter = rowLetter.strip().toUpperCase(java.util.Locale.ROOT); }
 }

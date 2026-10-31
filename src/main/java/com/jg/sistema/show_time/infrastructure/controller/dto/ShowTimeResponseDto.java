@@ -8,6 +8,8 @@ import java.util.UUID;
 public record ShowTimeResponseDto(
         UUID id,
         CinemaRoomResponseDto rooms,
-        LocalDateTime startTime
+        LocalDateTime startTime,
+        LocalDateTime endTime,
+        com.jg.sistema.cinema.domain.model.Format format
 ) {
 }

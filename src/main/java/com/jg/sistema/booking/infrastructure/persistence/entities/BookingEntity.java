@@ -32,7 +32,8 @@ public class BookingEntity {
     @Enumerated(value = EnumType.STRING)
     private BookingStatus bookingStatus;
 
-    private String paymentStatus;
+    @Enumerated(EnumType.STRING)
+    private com.jg.sistema.booking.domain.model.PaymentStatus paymentStatus;
 
     @Column(nullable = false)
     private BigDecimal subTotal;

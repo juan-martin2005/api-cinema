@@ -85,6 +85,7 @@ public class BookingMapper {
                 domain.total(),
                 domain.creatAt(),
                 domain.expiredAt(),
+                "PEN",
                 BookingDetailMapper.toResponseList(domain.details())
         );
     }

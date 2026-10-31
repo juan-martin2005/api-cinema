@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface GetBookingUseCase {
+    Page<Booking> findPage(Pageable pageable);
     List<Booking> getAllBookings();
     List<Booking> getBookings();
     Booking getBookingById(UUID id);

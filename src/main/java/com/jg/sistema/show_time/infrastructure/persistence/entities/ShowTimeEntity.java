@@ -19,6 +19,9 @@ public class ShowTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "format_id")
+    private com.jg.sistema.cinema.infrastructure.persistence.entities.FormatEntity format;
 
     @ManyToOne
     private MovieEntity movie;

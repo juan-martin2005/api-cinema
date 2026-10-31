@@ -9,9 +9,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface MovieRepositoryPort {
+    Page<Movie> search(Pageable pageable, String title, String genre);
     List<Movie> findAllMovies(String title, String genre);
     boolean existsByTitle(String title);
     Optional<Movie> findById(UUID id);
+    Optional<Movie> findAuthoritativeById(UUID id);
     void save(Movie movie);
 
 }

@@ -20,6 +20,8 @@ public class SeatMapper {
                 .id(seat.id())
                 .row(seat.row())
                 .number(seat.number())
+                .posX(seat.posX())
+                .posY(seat.posY())
                 .room(roomEntity)
                 .build();
     }

@@ -108,6 +108,8 @@ public class CinemaService implements GetCinemaUseCase, CreateCinemaUseCase, Upd
         if (formatIds == null || formatIds.isEmpty()) {
             return Collections.emptySet();
         }
-        return formatRepositoryPort.findByIds(formatIds);
+        Set<Format> formats = formatRepositoryPort.findByIds(formatIds);
+        if (formats.size() != formatIds.size()) throw new com.jg.sistema.cinema.domain.exception.FormatNotFoundException("One or more formats do not exist");
+        return formats;
     }
 }

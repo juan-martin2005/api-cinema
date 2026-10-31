@@ -16,10 +16,6 @@ public interface PostgreSqlBookingRepository extends JpaRepository<BookingEntity
     List<BookingEntity> findByShowTimeEntityId(UUID showTimeId);
     boolean existsByCode(String code);
 
-    @Query("SELECT bd.seatLabel FROM BookingDetailEntity bd " +
-           "WHERE bd.booking.showTimeEntity.id = :showTimeId " +
-           "AND (bd.booking.bookingStatus = BookingStatus.CONFIRMED " +
-           "OR bd.booking.bookingStatus = BookingStatus.USED " +
-           "OR (bd.booking.bookingStatus = BookingStatus.PENDING AND bd.booking.expiredAt > :now))")
+    @Query(value = "SELECT CONCAT(s.\"row\",s.number) FROM seat_occupations o JOIN seats s ON s.id=o.seat_id WHERE o.show_time_id=:showTimeId", nativeQuery = true)
     List<String> findOccupiedSeatLabels(@Param("showTimeId") UUID showTimeId, @Param("now") LocalDateTime now);
 }

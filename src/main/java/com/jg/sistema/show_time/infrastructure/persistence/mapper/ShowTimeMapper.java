@@ -22,7 +22,8 @@ public class ShowTimeMapper {
                 MovieMapper.mapToDomain(entity.getMovie()),
                 CinemaRoomMapper.toDomain(entity.getCinemaRoom()),
                 entity.getStartTime(),
-                entity.getEndTime()
+                entity.getEndTime(),
+                com.jg.sistema.cinema.infrastructure.persistence.mapper.FormatMapper.toDomain(entity.getFormat())
         );
     }
 
@@ -34,6 +35,7 @@ public class ShowTimeMapper {
                 .cinemaRoom(CinemaRoomMapper.toEntity(showTime.cinemaRoom()))
                 .startTime(showTime.startTime())
                 .endTime(showTime.endTime())
+                .format(com.jg.sistema.cinema.infrastructure.persistence.mapper.FormatMapper.toEntity(showTime.format()))
                 .build();
     }
 
@@ -44,7 +46,8 @@ public class ShowTimeMapper {
                 Movie.withId(req.movieId()),
                 CinemaRoom.withId(req.cinemaRoomId()),
                 req.startTime(),
-                null
+                null,
+                new com.jg.sistema.cinema.domain.model.Format(req.formatId(), null, null)
         );
     }
 
@@ -53,7 +56,9 @@ public class ShowTimeMapper {
         return new ShowTimeResponseDto(
                 showTime.id(),
                 CinemaRoomMapper.toResponse(showTime.cinemaRoom()),
-                showTime.startTime()
+                showTime.startTime(),
+                showTime.endTime(),
+                showTime.format()
         );
     }
 }

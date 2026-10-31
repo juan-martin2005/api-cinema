@@ -73,7 +73,7 @@ public interface ApiCinemaRoomDoc {
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ErrorResponse.class)))
             })
-    ResponseEntity<?> updateCinemaRoom(UUID id, CinemaRoomRequestDto cinemaRoomRequestDto);
+    ResponseEntity<?> updateCinemaRoom(UUID id, com.jg.sistema.cinema_room.infrastructure.controller.dto.CinemaRoomUpdateDto cinemaRoomRequestDto);
 
     @Operation(summary = "Delete cinema rooms by id", description = "Delete a cinema room from the system by their unique identifier, only accessible by admin users",
             responses = {

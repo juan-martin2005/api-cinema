@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface BookingRepositoryPort {
+    Page<Booking> findPage(Pageable pageable);
     Booking save(Booking booking);
     Optional<Booking> findById(UUID id);
     Optional<Booking> findByCode(String code);

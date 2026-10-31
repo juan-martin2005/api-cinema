@@ -16,6 +16,7 @@ public class SeatEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+    @Column(name = "\"row\"")
     private String row;
     private Integer number;
     @Column(name = "pos_x")

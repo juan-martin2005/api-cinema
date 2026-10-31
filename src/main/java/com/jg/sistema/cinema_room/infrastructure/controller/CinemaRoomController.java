@@ -55,8 +55,8 @@ public class CinemaRoomController implements ApiCinemaRoomDoc {
     @Override
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<?> updateCinemaRoom(@PathVariable UUID id, @Valid @RequestBody CinemaRoomRequestDto cinemaRoomRequestDto) {
-        CinemaRoom cinemaRoom = CinemaRoomMapper.toDomain(cinemaRoomRequestDto);
+    public ResponseEntity<?> updateCinemaRoom(@PathVariable UUID id, @Valid @RequestBody com.jg.sistema.cinema_room.infrastructure.controller.dto.CinemaRoomUpdateDto cinemaRoomRequestDto) {
+        CinemaRoom cinemaRoom = new CinemaRoom(null, cinemaRoomRequestDto.name(), null, null, null);
         updateCinemaRoomUseCase.updateCinemaRoom(id, cinemaRoom);
         return ResponseEntity.ok(new ApiResponseDTO("Cinema Room updated successfully", true));
     }

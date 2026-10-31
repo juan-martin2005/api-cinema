@@ -12,8 +12,12 @@ public record ShowTime(
         Movie movie,
         CinemaRoom cinemaRoom,
         LocalDateTime startTime,
-        LocalDateTime endTime
+        LocalDateTime endTime,
+        com.jg.sistema.cinema.domain.model.Format format
 ) {
+    public ShowTime(UUID id, Movie movie, CinemaRoom room, LocalDateTime start, LocalDateTime end) {
+        this(id, movie, room, start, end, null);
+    }
     private static final int OPENING_HOUR  = 10;
     private static final int CLOSING_HOUR  = 23;
     public ShowTime {
@@ -21,7 +25,7 @@ public record ShowTime(
     }
 
     private static void validateBusinessHours(LocalDateTime start) {
-        if (start != null && start.getHour() < OPENING_HOUR) {
+        if (start != null && (start.getHour() < OPENING_HOUR || start.getHour() >= CLOSING_HOUR)) {
             throw new InvalidTimeException("Show times must start at or after %d:00 am".formatted(OPENING_HOUR));
         }
     }
@@ -37,7 +41,8 @@ public record ShowTime(
                 movie,
                 cinemaRoom,
                 startTime,
-                calculatedEndTime
+                calculatedEndTime,
+                format
         );
     }
 
@@ -48,7 +53,8 @@ public record ShowTime(
                 movie,
                 cinemaRoom,
                 startTime,
-                calculatedEndTime
+                calculatedEndTime,
+                format
         );
     }
 }

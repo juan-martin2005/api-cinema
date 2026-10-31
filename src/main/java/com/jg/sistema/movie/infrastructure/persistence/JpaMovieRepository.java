@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 public class JpaMovieRepository implements MovieRepositoryPort {
 
     private final PostgreSqlMovieRepository movieRepository;
+    public Page<Movie> search(Pageable pageable,String title,String genre) { return movieRepository.search(pageable,title,genre).map(MovieMapper::mapToDomain); }
 
     @Override
     @Cacheable(value = "movieSearch", key = "{#title, #genre}")
@@ -35,14 +36,19 @@ public class JpaMovieRepository implements MovieRepositoryPort {
     }
 
     @Override
-    @Cacheable(value = "movieById", key = "#id")
+    @Cacheable(value = "movieById", key = "#id", unless = "#result == null")
     public Optional<Movie> findById(UUID id) {
         return movieRepository.findById(id).map(MovieMapper::mapToDomain);
     }
 
     @Override
+    public Optional<Movie> findAuthoritativeById(UUID id) {
+        return movieRepository.findById(id).map(MovieMapper::mapToDomain);
+    }
+
+    @Override
     @Caching(evict = {
-            @CacheEvict(value = "movieById", key = "#result.id()", condition = "#movie.id() != null "),
+            @CacheEvict(value = "movieById", key = "#movie.id()", condition = "#movie.id() != null "),
             @CacheEvict(value = "movieSearch", allEntries = true),
     })
     public void save(Movie movie) {

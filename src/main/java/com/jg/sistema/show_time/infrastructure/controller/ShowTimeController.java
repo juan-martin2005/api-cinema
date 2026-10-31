@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RequestMapping("/api/show-times")
 public class ShowTimeController {
+    private final java.time.Clock clock;
 
     private final GetShowTimeUseCase getShowTimeUseCase;
     private final CreateShowTimeUseCase createShowTimeUseCase;
@@ -39,7 +40,7 @@ public class ShowTimeController {
 
     @GetMapping("/movie")
     public List<ShowTimeResponseDto> getAllShowTimesByMovie(@RequestParam UUID movieId) {
-        return getShowTimeUseCase.getShowTimeByMovieIdAndStartTimeAfter(movieId, LocalDateTime.now()).stream().map(ShowTimeMapper::toResponse).collect(Collectors.toList());
+        return getShowTimeUseCase.getShowTimeByMovieIdAndStartTimeAfter(movieId, LocalDateTime.now(clock)).stream().map(ShowTimeMapper::toResponse).collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")

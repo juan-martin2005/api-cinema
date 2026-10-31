@@ -58,9 +58,8 @@ public class BookingController implements ApiBookingDoc {
     @PreAuthorize("hasAuthority('ADMIN')")
     public PagedModel<BookingResponseDto> getBookings(@RequestParam(defaultValue = "0", required = false) Integer page, @RequestParam(defaultValue = "15", required = false) Integer size) {
 
-        List<BookingResponseDto> bookingList = getBookingUseCase.getBookings().stream().map(BookingMapper::toResponse).toList();
-
-        Page<BookingResponseDto> bookings = PaginationUtils.paginate(bookingList, page, size);
+        if (page < 0 || size < 1 || size > 100) throw new IllegalArgumentException("Invalid page or size");
+        Page<BookingResponseDto> bookings = getBookingUseCase.findPage(org.springframework.data.domain.PageRequest.of(page,size,org.springframework.data.domain.Sort.by("creatAt").descending())).map(BookingMapper::toResponse);
         return new PagedModel<>(bookings);
     }
 

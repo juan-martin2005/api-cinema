@@ -31,7 +31,10 @@ public class MovieService implements GetMovieUseCase, CreateMovieUseCase, Update
     @Value("${movie.poster.directory}")
     private String DIRECTORY;
     private final MovieRepositoryPort movieRepository;
+    @Transactional(readOnly = true)
+    public Page<Movie> search(Pageable pageable,String title,String genre) { return movieRepository.search(pageable,title,genre); }
     private final CloudStorePort cloudStorePort;
+    private final com.jg.sistema.shared.application.port.CoordinationPort coordination;
 
     @Override
     @Transactional
@@ -70,7 +73,10 @@ public class MovieService implements GetMovieUseCase, CreateMovieUseCase, Update
     @Override
     @Transactional
     public void updateMovie(Movie movie, UUID id, MultipartFile file) {
-        Movie m = movieRepository.findById(id).orElseThrow(() -> new MovieNotFoundException("Movie not found with id: " + id));
+        coordination.lockMovie(id);
+        Movie m = movieRepository.findAuthoritativeById(id).orElseThrow(() -> new MovieNotFoundException("Movie not found with id: " + id));
+        if (!java.util.Objects.equals(m.duration(), movie.duration()) && coordination.hasFutureShowTimes(id))
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT,"Cannot change duration while future showtimes exist");
         String posterUrl = (file == null || file.isEmpty()) ? m.posterUrl() : saveFile(file);
         Movie uMovie = new Movie(
                 id,

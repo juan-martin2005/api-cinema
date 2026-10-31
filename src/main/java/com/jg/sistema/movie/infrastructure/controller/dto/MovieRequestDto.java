@@ -9,13 +9,13 @@ public record MovieRequestDto(
         @NotBlank String title,
         @NotBlank String description,
         @NotBlank String classification,
-        @NotNull Integer duration,
+        @NotNull @jakarta.validation.constraints.Positive Integer duration,
         @NotBlank String genre,
         Boolean isNewRelease,
         Boolean isPreSale,
         LocalDateTime openingDate
 ) {
-    public MovieRequestDto(String title, String description, String classification, Integer duration, String genre) {
+    public MovieRequestDto(String title, String description, String classification, @jakarta.validation.constraints.Positive Integer duration, String genre) {
         this(title, description, classification, duration, genre, false, false, null);
     }
 }

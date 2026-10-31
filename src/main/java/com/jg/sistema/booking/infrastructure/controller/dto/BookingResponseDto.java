@@ -13,12 +13,13 @@ public record BookingResponseDto(
         UUID showTimeId,
         UUID userId,
         BookingStatus bookingStatus,
-        String paymentStatus,
+        com.jg.sistema.booking.domain.model.PaymentStatus paymentStatus,
         BigDecimal subTotal,
         BigDecimal tax,
         BigDecimal total,
         LocalDateTime creatAt,
         LocalDateTime expiredAt,
+        String currency,
         List<BookingDetailResponseDto> details
 ) {
 }

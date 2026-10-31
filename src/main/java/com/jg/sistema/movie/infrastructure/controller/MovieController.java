@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RequestMapping("api/movies")
 public class MovieController implements ApiMovieDoc {
+    private final java.time.Clock clock;
 
     private final GetMovieUseCase getMovieUseCase;
     private final CreateMovieUseCase createMovieUseCase;
@@ -47,14 +48,13 @@ public class MovieController implements ApiMovieDoc {
                                                      @RequestParam(required = false) String title,
                                                      @RequestParam(required = false)  String genre) {
 
-        List<Movie> moviesList = getMovieUseCase.getAllMoviesWithFilter(title, genre);
-        Page<Movie> moviesPage = PaginationUtils.paginate(moviesList, pageable);
+        Page<Movie> moviesPage = getMovieUseCase.search(pageable, title, genre);
 
         List<UUID> movieIds = moviesPage.getContent().stream().map(Movie::id).collect(Collectors.toList());
 
         Map<UUID, List<ShowTime>> showTimesByMovieId = movieIds.isEmpty()
                 ? Collections.emptyMap()
-                : getShowTimeUseCase.getShowTimesByMovieIdsAndStartTimeAfter(movieIds, LocalDateTime.now())
+                : getShowTimeUseCase.getShowTimesByMovieIdsAndStartTimeAfter(movieIds, LocalDateTime.now(clock))
                         .stream()
                         .collect(Collectors.groupingBy(st -> st.movie().id()));
 
@@ -69,7 +69,7 @@ public class MovieController implements ApiMovieDoc {
     @GetMapping("/{id}")
     public MovieResponseDto getMovieById(@PathVariable UUID id) {
         Movie movie = getMovieUseCase.getById(id);
-        List<ShowTime> functions = getShowTimeUseCase.getShowTimeByMovieIdAndStartTimeAfter(movie.id(), LocalDateTime.now());
+        List<ShowTime> functions = getShowTimeUseCase.getShowTimeByMovieIdAndStartTimeAfter(movie.id(), LocalDateTime.now(clock));
         return MovieMapper.mapToResponseDto(movie, functions);
     }
 

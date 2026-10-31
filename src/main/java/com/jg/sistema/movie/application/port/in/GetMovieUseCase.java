@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface GetMovieUseCase {
+    Page<Movie> search(Pageable pageable, String title, String genre);
     Movie getById(UUID id);
     List<Movie> getAllMoviesWithFilter(String title, String genre);
 }

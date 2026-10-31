@@ -11,6 +11,6 @@ public record BookingRequestDto(
         UUID showTimeId,
 
         @NotEmpty(message = "At least one seat must be selected")
-        List<UUID> seatIds
+        @jakarta.validation.constraints.Size(max = 10) List<@NotNull UUID> seatIds
 ) {
 }

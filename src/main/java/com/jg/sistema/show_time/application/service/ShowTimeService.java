@@ -28,6 +28,9 @@ public class ShowTimeService implements GetShowTimeUseCase, CreateShowTimeUseCas
     private final ShowTimeRepositoryPort showTimeRepositoryPort;
     private final MovieRepositoryPort movieRepositoryPort;
     private final CinemaRoomRepositoryPort cinemaRoomRepositoryPort;
+    private final com.jg.sistema.cinema.application.port.out.FormatRepositoryPort formats;
+    private final com.jg.sistema.shared.application.port.CoordinationPort coordination;
+    private final java.time.Clock clock;
 
     @Override
     @Transactional(readOnly = true)
@@ -36,6 +39,7 @@ public class ShowTimeService implements GetShowTimeUseCase, CreateShowTimeUseCas
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ShowTime> getShowTimeByMovieIdAndStartTimeAfter(UUID movieId, LocalDateTime time) {
         return showTimeRepositoryPort.findShowTimeMovieIdAndStarTimeAfter(movieId, time);
     }
@@ -60,7 +64,10 @@ public class ShowTimeService implements GetShowTimeUseCase, CreateShowTimeUseCas
     @Override
     @Transactional
     public void createShowTime(ShowTime showTime) {
-        Movie movie = movieRepositoryPort.findById(showTime.movie().id())
+        coordination.lockMovie(showTime.movie().id());
+        coordination.lockRoom(showTime.cinemaRoom().id());
+        validateFuture(showTime.startTime());
+        Movie movie = movieRepositoryPort.findAuthoritativeById(showTime.movie().id())
                 .orElseThrow(() -> new MovieNotFoundException("Movie not found with id: " + showTime.movie().id()));
         CinemaRoom cinemaRoom = cinemaRoomRepositoryPort.findById(showTime.cinemaRoom().id())
                 .orElseThrow(() -> new CinemaRoomNotFoundException("Cinema room not found with id: " + showTime.cinemaRoom().id()));
@@ -70,7 +77,8 @@ public class ShowTimeService implements GetShowTimeUseCase, CreateShowTimeUseCas
 
         validateShowTimeOverlap(cinemaRoom.id(), startTime, endTime, null);
 
-        ShowTime createdShowTime = showTime.create(
+        ShowTime resolved = withFormat(showTime, cinemaRoom);
+        ShowTime createdShowTime = resolved.create(
                 movie,
                 cinemaRoom,
                 startTime
@@ -81,11 +89,16 @@ public class ShowTimeService implements GetShowTimeUseCase, CreateShowTimeUseCas
     @Override
     @Transactional
     public void updateShowTime(UUID id, ShowTime showTime) {
+        coordination.lockShowTime(id);
+        if (coordination.hasBookings(id)) throw new ShowTimeAlreadyExistException("Cannot reschedule a showtime with active reservations");
+        coordination.lockMovie(showTime.movie().id());
+        coordination.lockRoom(showTime.cinemaRoom().id());
+        validateFuture(showTime.startTime());
         ShowTime existing = showTimeRepositoryPort.findShowTimeById(id)
                 .orElseThrow(() -> new ShowTimeNotFoundException("ShowTime not found with id: " + id));
 
         Movie movie = (showTime.movie() != null && showTime.movie().id() != null)
-                ? movieRepositoryPort.findById(showTime.movie().id())
+                ? movieRepositoryPort.findAuthoritativeById(showTime.movie().id())
                     .orElseThrow(() -> new MovieNotFoundException("Movie not found with id: " + showTime.movie().id()))
                 : existing.movie();
 
@@ -99,8 +112,18 @@ public class ShowTimeService implements GetShowTimeUseCase, CreateShowTimeUseCas
 
         validateShowTimeOverlap(cinemaRoom.id(), startTime, endTime, id);
 
-        ShowTime updatedShowTime = existing.update(movie, cinemaRoom, startTime);
+        ShowTime resolved = withFormat(showTime, cinemaRoom);
+        ShowTime updatedShowTime = new ShowTime(id, movie, cinemaRoom, startTime, endTime, resolved.format());
         showTimeRepositoryPort.saveShowTime(updatedShowTime);
+    }
+
+    private void validateFuture(LocalDateTime start) {
+        if (start == null || !start.isAfter(LocalDateTime.now(clock))) throw new com.jg.sistema.show_time.domain.exception.InvalidTimeException("Showtime must be in the future");
+    }
+    private ShowTime withFormat(ShowTime showTime, CinemaRoom room) {
+        var format = formats.findById(showTime.format().id()).orElseThrow(() -> new com.jg.sistema.cinema.domain.exception.FormatNotFoundException("Format not found"));
+        if (room.cinema().formats().stream().noneMatch(f -> f.id().equals(format.id()))) throw new com.jg.sistema.show_time.domain.exception.InvalidTimeException("Format is not available in this cinema");
+        return new ShowTime(showTime.id(), showTime.movie(), room, showTime.startTime(), showTime.endTime(), format);
     }
 
     private void validateShowTimeOverlap(UUID cinemaRoomId, LocalDateTime startTime, LocalDateTime endTime, UUID excludeId) {

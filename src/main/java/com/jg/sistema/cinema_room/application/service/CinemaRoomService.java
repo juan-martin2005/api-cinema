@@ -59,6 +59,12 @@ public class CinemaRoomService implements GetCinemaRoomUseCase, CreateCinemaRoom
                     .orElseThrow(() -> new CinemaNotFoundException("Cinema with id " + cinemaRoom.cinema().id() + " not found"));
         }
 
+        Set<String> labels = new java.util.HashSet<>();
+        Set<String> positions = new java.util.HashSet<>();
+        for (Seat seat : seats) {
+            if (!labels.add(seat.label()) || !positions.add(seat.posX() + ":" + seat.posY()))
+                throw new CinemaRoomCapacityException("Duplicate seat label or position");
+        }
         CinemaRoom room = cinemaRoom.create(
                 cinemaRoom.name(),
                 cinemaRoom.capacity(),
@@ -71,7 +77,8 @@ public class CinemaRoomService implements GetCinemaRoomUseCase, CreateCinemaRoom
     @Override
     @Transactional
     public void updateCinemaRoom(UUID id, CinemaRoom cinemaRoom) {
-        if (cinemaRoomRepository.existsByName(cinemaRoom.name(), id, cinemaRoom.cinema().id())) {
+        CinemaRoom original = getCinemaRoomById(id);
+        if (cinemaRoomRepository.existsByName(cinemaRoom.name(), id, original.cinema().id())) {
             throw new CinemaRoomAlreadyExistsException("Cinema Room with name " + cinemaRoom.name() + " already exists");
         }
         CinemaRoom room = cinemaRoomRepository.findById(id)
