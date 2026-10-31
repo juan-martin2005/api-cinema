@@ -54,6 +54,9 @@ public class PaymentService implements PaymentOperations {
                 throw new ResponseStatusException(CONFLICT,"Reservation is not pending or has expired");
             Attempt existing=attempt(id);
             if(existing!=null) return existing;
+            LocalDateTime start=jdbc.queryForObject("SELECT start_time FROM show_times WHERE id=?",LocalDateTime.class,b.get("show_time_entity_id"));
+            if(start.isBefore(now().plusMinutes(35)))
+                throw new ResponseStatusException(CONFLICT,"Checkout requires at least 35 minutes before showtime");
             UUID aid=UUID.randomUUID();
             var expires=now().plusMinutes(31).withNano(0);
             jdbc.update("INSERT INTO payment_attempts(id,booking_id,state,updated_at,checkout_expires_at) VALUES (?,?,'CREATING',?,?)",aid,id,now(),expires);

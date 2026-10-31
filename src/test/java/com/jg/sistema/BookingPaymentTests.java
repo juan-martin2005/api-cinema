@@ -205,6 +205,11 @@ class BookingPaymentTests {
         try { payments.reconcilePending(); } finally { org.springframework.test.util.ReflectionTestUtils.setField(payments,"jobsEnabled",false); }
         assertEquals(BookingStatus.EXPIRED,bookings.getBookingById(b.id()).bookingStatus());assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM seat_occupations",Integer.class));
     }
+    @Test void checkoutCannotExtendHoldPastShowtime() {
+        var b=reserve();jdbc.update("UPDATE show_times SET start_time=? WHERE id=?",LocalDateTime.now(clock).plusMinutes(20),show);
+        assertEquals(409,assertThrows(ResponseStatusException.class,()->payments.checkout(b.id())).getStatusCode().value());
+        assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM payment_attempts",Integer.class));
+    }
     @Test void otpAttemptsAreLimitedAndMailIsDurable() {
         jdbc.update("UPDATE users SET is_active=FALSE,is_verified=FALSE WHERE id=?",user);
         emailService.sendCodeToEmail("OWNER@example.test");
