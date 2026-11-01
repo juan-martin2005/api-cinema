@@ -36,6 +36,20 @@ Swagger: `http://localhost:8080/swagger-ui/index.html`.
 El volumen `cinema_dev_data` conserva datos entre arranques. Eliminarlo es una
 operación manual que no forma parte del arranque ni de las pruebas.
 
+Una base antigua marcada como `Flyway Baseline` en V1 puede conservar el esquema
+generado por Hibernate y omitir los objetos de la migración inicial. La migración
+`V1001__upgrade_baselined_legacy_schema.sql` añade las columnas/tablas faltantes,
+asigna formatos únicamente cuando la relación es inequívoca y recupera la ocupación
+de reservas existentes. Conserva usuarios, funciones y reservas; los conflictos de
+unicidad abortan la migración en lugar de eliminar datos.
+
+Antes de actualizar una base existente, realizar un respaldo y validar sobre una
+copia. Si su historial registra V1000 con checksum `0` por un script vacío antiguo,
+ese caso requiere reconciliar el historial tras comprobar que los datos de demo ya
+existen. No ejecutar `repair` automáticamente ni usar `ddl-auto: update` para ocultar
+errores. La corrección de esta instalación se verificó primero sobre una copia y
+después con un arranque real usando `ddl-auto: validate`.
+
 ## Autenticación y autorización
 
 `POST /api/auth/register`, `/login`, `/refreshToken` y `/logout` conservan su función.
